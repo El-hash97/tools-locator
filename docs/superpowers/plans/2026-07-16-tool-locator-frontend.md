@@ -17,6 +17,7 @@
 - **`react-to-print` v3**: `useReactToPrint({ contentRef })`. **Jangan** memakai `content: () => ref.current` (API v2 yang sudah usang). (Diverifikasi via Context7.)
 - **`html5-qrcode`**: callback error pada `start()` menyala di **setiap frame** yang tidak berisi QR. Ini normal. **Jangan** menampilkannya sebagai pesan error ke pengguna — abaikan diam-diam. Hanya kegagalan pada `Promise` dari `start()` (izin ditolak, kamera tidak ada) yang merupakan error sebenarnya.
 - Semua metode `ToolRepository` `async`, termasuk di implementasi mock.
+- **Penulisan di repository mengganti slot, tidak pernah memutasi objek di tempat.** Tulis `db.tools[i] = { ...db.tools[i], ...input }`, jangan `Object.assign(tool, input)` atau `tool.jumlah += 1`. Alasannya: `load()` menyalin array seed secara dangkal (`[...seedTools]`), jadi pada reseed pertama objek di dalamnya masih objek seed yang sama. Mengganti slot membiarkannya utuh; memutasi di tempat akan merusak data seed secara permanen — dan test reseed tidak akan menangkapnya, karena panjang array tetap 8.
 - Tidak ada komponen UI yang mengimpor `MockRepository`, `seed.ts`, atau `localStorage` secara langsung — selalu lewat `ToolRepository` dari context.
 - Warna aksen Toyota Red: `#EB0A1E`. Netral abu/putih. Kontras tinggi.
 - Mobile-first, dominan portrait, target sentuh besar (minimal 44px).
@@ -97,11 +98,13 @@ Tambahkan ke `compilerOptions` dalam `tsconfig.app.json`:
 ```json
 {
   "compilerOptions": {
-    "baseUrl": ".",
-    "paths": { "@/*": ["./src/*"] }
+    "paths": { "@/*": ["./src/*"] },
+    "types": ["vitest/globals"]
   }
 }
 ```
+
+**Jangan** menambahkan `"baseUrl"`. TypeScript 6 memperlakukannya sebagai error (`TS5101`) dan `npm run build` akan gagal; `moduleResolution: "bundler"` hanya butuh `paths`. `types: ["vitest/globals"]` diperlukan karena `globals: true` dipakai di konfigurasi Vitest.
 
 - [ ] **Step 6: Ganti isi `src/index.css` dengan Tailwind v4 + token warna**
 
@@ -270,7 +273,7 @@ export interface ToolRepository {
 
 - [ ] **Step 3: Pastikan TypeScript bersih**
 
-Run: `npx tsc --noEmit`
+Run: `npx tsc -b`
 Expected: tidak ada error.
 
 - [ ] **Step 4: Commit**
@@ -400,7 +403,7 @@ export const seedTools: Tool[] = [
 
 - [ ] **Step 2: Pastikan TypeScript bersih**
 
-Run: `npx tsc --noEmit`
+Run: `npx tsc -b`
 Expected: tidak ada error.
 
 - [ ] **Step 3: Commit**
@@ -493,9 +496,25 @@ describe('MockRepository', () => {
   })
 
   test('menolak hapus kategori yang masih dipakai tools', async () => {
+    // Sebut jumlahnya, bukan sekadar "masih dipakai": tanpa ini, kode yang
+    // salah hitung atau memeriksa field keliru tetap lolos test.
     await expect(repo().deleteCategory('cat-kunci')).rejects.toThrow(
-      /masih dipakai/i,
+      /masih dipakai 3 tools/i,
     )
+  })
+
+  test('reseed setelah storage dikosongkan tidak membawa data lama', async () => {
+    await repo().saveTool({
+      nama: 'Tools Sementara',
+      category_id: 'cat-kunci',
+      location_id: 'loc-melting-a1',
+      jumlah: 1,
+    })
+    localStorage.clear()
+
+    const tools = await repo().getTools()
+    expect(tools).toHaveLength(8)
+    expect(tools.some((t) => t.nama === 'Tools Sementara')).toBe(false)
   })
 
   test('mengizinkan hapus kategori yang tidak dipakai', async () => {
@@ -557,10 +576,13 @@ function save(db: Db): void {
 function load(): Db {
   const raw = localStorage.getItem(STORAGE_KEY)
   if (!raw) {
+    // Salin, jangan pakai array seed langsung: `push` di saveTool akan
+    // mengubah array asli di modul seed secara permanen, sehingga reseed
+    // berikutnya membawa data lama, bukan seed sebenarnya.
     const initial: Db = {
-      tools: seedTools,
-      categories: seedCategories,
-      locations: seedLocations,
+      tools: [...seedTools],
+      categories: [...seedCategories],
+      locations: [...seedLocations],
     }
     save(initial)
     return initial
@@ -673,7 +695,7 @@ export class MockRepository implements ToolRepository {
 - [ ] **Step 4: Jalankan test, pastikan LULUS**
 
 Run: `npm test -- mockRepository`
-Expected: PASS (9 test)
+Expected: PASS (10 test)
 
 - [ ] **Step 5: Commit**
 
