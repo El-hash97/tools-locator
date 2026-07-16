@@ -30,10 +30,13 @@ function save(db: Db): void {
 function load(): Db {
   const raw = localStorage.getItem(STORAGE_KEY)
   if (!raw) {
+    // Salin, jangan pakai array seed langsung: `push` di saveTool akan
+    // mengubah array asli di modul seed secara permanen, sehingga reseed
+    // berikutnya membawa data lama, bukan seed sebenarnya.
     const initial: Db = {
-      tools: seedTools,
-      categories: seedCategories,
-      locations: seedLocations,
+      tools: [...seedTools],
+      categories: [...seedCategories],
+      locations: [...seedLocations],
     }
     save(initial)
     return initial

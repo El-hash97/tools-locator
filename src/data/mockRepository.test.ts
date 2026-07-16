@@ -64,9 +64,25 @@ describe('MockRepository', () => {
   })
 
   test('menolak hapus kategori yang masih dipakai tools', async () => {
+    // Sebut jumlahnya, bukan sekadar "masih dipakai": tanpa ini, kode yang
+    // salah hitung atau memeriksa field keliru tetap lolos test.
     await expect(repo().deleteCategory('cat-kunci')).rejects.toThrow(
-      /masih dipakai/i,
+      /masih dipakai 3 tools/i,
     )
+  })
+
+  test('reseed setelah storage dikosongkan tidak membawa data lama', async () => {
+    await repo().saveTool({
+      nama: 'Tools Sementara',
+      category_id: 'cat-kunci',
+      location_id: 'loc-melting-a1',
+      jumlah: 1,
+    })
+    localStorage.clear()
+
+    const tools = await repo().getTools()
+    expect(tools).toHaveLength(8)
+    expect(tools.some((t) => t.nama === 'Tools Sementara')).toBe(false)
   })
 
   test('mengizinkan hapus kategori yang tidak dipakai', async () => {
