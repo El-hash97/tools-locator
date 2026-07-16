@@ -25,10 +25,14 @@ export function levenshtein(a: string, b: string): number {
   return previous[b.length]
 }
 
-// Query pendek tidak ditoleransi typo-nya: pada kata 3 huruf, jarak 1 sudah
-// mencocokkan hampir apa saja dan hasil pencarian jadi sampah.
+// Query pendek tidak ditoleransi typo-nya. Pada 4 huruf, jarak 1 sudah
+// mencocokkan terlalu banyak: "pasu" akan memunculkan Kunci Pas 12, Sekop
+// Pasir, dan Palu Karet sekaligus, dan "paku" (kata yang sah dan berbeda)
+// memunculkan Palu Karet. Konsekuensinya disengaja: salah ketik pada nama
+// pendek seperti "Palo" tidak ketemu, dan MP mengetik ulang — itu lebih baik
+// daripada disodori tools yang salah.
 export function maxDistanceFor(query: string): number {
-  if (query.length <= 3) return 0
+  if (query.length <= 4) return 0
   if (query.length <= 5) return 1
   return 2
 }
