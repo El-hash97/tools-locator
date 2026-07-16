@@ -1259,9 +1259,14 @@ test('memuat tools dan kategori lalu menyediakannya lewat useData', async () => 
   })
 })
 
-test('memunculkan pesan saat data gagal dimuat, bukan memuat selamanya', async () => {
-  // Tanpa test ini, menghapus setError dari blok catch lolos seluruh suite —
-  // dan MP hanya melihat "Memuat…" selamanya tanpa tahu apa yang salah.
+test('memunculkan pesan saat data gagal dimuat, bukan diam-diam kosong', async () => {
+  // Tanpa test ini, menghapus setError dari blok catch lolos seluruh suite.
+  // finally { setLoading(false) } tetap jalan, jadi provider selesai dengan
+  // error null dan tools kosong — Home render "Tools tidak ditemukan. Coba
+  // kata lain.", persis seperti pemuatan yang berhasil tapi tak ada hasilnya.
+  // MP menyimpulkan tools-nya memang tidak ada, bukan bahwa aplikasi rusak.
+  // Itu lebih berbahaya daripada macet: layar macet jelas rusak dan pasti
+  // dilaporkan, daftar kosong terlihat masuk akal.
   vi.spyOn(MockRepository.prototype, 'getTools').mockRejectedValue(
     new Error('Penyimpanan rusak'),
   )
