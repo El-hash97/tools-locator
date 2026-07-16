@@ -14,6 +14,8 @@ test('menampilkan nama aplikasi di beranda', async () => {
     </MemoryRouter>,
   )
   await waitFor(() => {
-    expect(screen.getByText('Tool Locator')).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { name: 'Tool Locator' }),
+    ).toBeInTheDocument()
   })
 })
