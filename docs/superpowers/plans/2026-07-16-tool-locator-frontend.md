@@ -1477,7 +1477,7 @@ git commit -m "feat: add data context and app routing skeleton"
 
 **Files:**
 - Create: `src/pages/Home.tsx`, `src/components/ToolCard.tsx`, `src/components/ScanFab.tsx`
-- Modify: `src/App.tsx`
+- Modify: `src/App.tsx`, `src/App.test.tsx`
 - Test: `src/pages/Home.test.tsx`
 
 **Interfaces:**
@@ -1778,10 +1778,26 @@ Tambahkan impor `import Home from '@/pages/Home'` dan ganti baris rute beranda m
 <Route path="/" element={<Home />} />
 ```
 
-- [ ] **Step 7: Jalankan test, pastikan LULUS**
+- [ ] **Step 7: Perbaiki query di `src/App.test.tsx`**
+
+Judul beranda dua warna: `<h1>Tool <span>Locator</span></h1>`. `getByText('Tool Locator')` **tidak akan** mencocokkannya — RTL hanya menggabungkan teks anak langsung sebuah elemen, jadi `"Tool "` dan `"Locator"` tidak pernah menyatu. Test smoke dari Task 8 akan merah di sini.
+
+Perbaiki test-nya, **bukan** komponennya — judul dua warna itu desain yang disengaja; query-nya yang terlalu rapuh:
+
+```tsx
+    expect(
+      screen.getByRole('heading', { name: 'Tool Locator' }),
+    ).toBeInTheDocument()
+```
+
+`getByRole` memakai perhitungan accessible name, yang meratakan teks turunan.
+
+- [ ] **Step 8: Jalankan test, pastikan LULUS**
 
 Run: `npm test -- Home`
 Expected: PASS (6 test)
+
+Lalu seluruh suite: `npm test` — pastikan `App.test.tsx` ikut hijau.
 
 - [ ] **Step 8: Commit**
 
