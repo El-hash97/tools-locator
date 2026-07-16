@@ -37,4 +37,22 @@ describe('parseScannedValue', () => {
     expect(parseScannedValue('halo dunia')).toBeNull()
     expect(parseScannedValue('')).toBeNull()
   })
+
+  test('menerima URL dari host lain — disengaja, bukan kelalaian', () => {
+    // Host tidak diperiksa dengan sengaja: id hanya dipakai untuk navigasi
+    // internal, dan memeriksa host akan membuat label yang dicetak sebelum
+    // pindah domain berhenti bisa di-scan. Test ini mengunci keputusan itu
+    // supaya tidak "diperbaiki" tanpa membaca alasannya.
+    expect(parseScannedValue('https://host-lain.example/return/tool-001')).toBe(
+      'tool-001',
+    )
+  })
+
+  test('menerima id UUID dari tools yang dibuat saat runtime', () => {
+    // Tools baru memakai crypto.randomUUID(). Kalau regex menolak bentuk ini,
+    // label tools yang baru dibuat tidak akan bisa di-scan sama sekali.
+    const uuid = '3f2504e0-4f89-11d3-9a0c-0305e82c3301'
+    expect(parseScannedValue(uuid)).toBe(uuid)
+    expect(parseScannedValue(`https://tloc.app/return/${uuid}`)).toBe(uuid)
+  })
 })
