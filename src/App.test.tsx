@@ -1,7 +1,19 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
+import { beforeEach, expect, test } from 'vitest'
 import App from './App'
 
-test('menampilkan nama aplikasi', () => {
-  render(<App />)
-  expect(screen.getByText('Tool Locator')).toBeInTheDocument()
+beforeEach(() => {
+  localStorage.clear()
+})
+
+test('menampilkan nama aplikasi di beranda', async () => {
+  render(
+    <MemoryRouter initialEntries={['/']}>
+      <App />
+    </MemoryRouter>,
+  )
+  await waitFor(() => {
+    expect(screen.getByText('Tool Locator')).toBeInTheDocument()
+  })
 })

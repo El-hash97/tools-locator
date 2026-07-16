@@ -1,7 +1,19 @@
+import { Route, Routes } from 'react-router-dom'
+import { DataProvider } from '@/data/DataProvider'
+
+function Placeholder({ nama }: { nama: string }) {
+  return <p className="p-6">{nama}</p>
+}
+
 export default function App() {
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold text-toyota">Tool Locator</h1>
-    </div>
+    <DataProvider>
+      <Routes>
+        <Route path="/" element={<Placeholder nama="Tool Locator" />} />
+        <Route path="/tools/:id" element={<Placeholder nama="Detail" />} />
+        <Route path="/scan" element={<Placeholder nama="Scan" />} />
+        <Route path="/return/:id" element={<Placeholder nama="Kembalikan" />} />
+      </Routes>
+    </DataProvider>
   )
 }
