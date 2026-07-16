@@ -1,5 +1,6 @@
 import { Route, Routes } from 'react-router-dom'
 import { DataProvider } from '@/data/DataProvider'
+import Home from '@/pages/Home'
 
 function Placeholder({ nama }: { nama: string }) {
   return <p className="p-6">{nama}</p>
@@ -9,7 +10,7 @@ export default function App() {
   return (
     <DataProvider>
       <Routes>
-        <Route path="/" element={<Placeholder nama="Tool Locator" />} />
+        <Route path="/" element={<Home />} />
         <Route path="/tools/:id" element={<Placeholder nama="Detail" />} />
         <Route path="/scan" element={<Placeholder nama="Scan" />} />
         <Route path="/return/:id" element={<Placeholder nama="Kembalikan" />} />
