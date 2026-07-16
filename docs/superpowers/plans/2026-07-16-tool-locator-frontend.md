@@ -1494,11 +1494,16 @@ Tulis `src/pages/Home.test.tsx`:
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
-import { beforeEach, expect, test } from 'vitest'
+import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import App from '@/App'
+import { MockRepository } from '@/data/mockRepository'
 
 beforeEach(() => {
   localStorage.clear()
+})
+
+afterEach(() => {
+  vi.restoreAllMocks()
 })
 
 function renderHome() {
@@ -1565,6 +1570,37 @@ test('memberi tahu saat tidak ada hasil', async () => {
   await user.type(screen.getByPlaceholderText(/cari tools/i), 'xyzabc')
 
   expect(screen.getByText(/tidak ditemukan/i)).toBeInTheDocument()
+})
+
+test('menggabungkan filter kategori dengan pencarian', async () => {
+  const user = userEvent.setup()
+  renderHome()
+  await waitFor(() => expect(screen.getByText('Kunci Pas 12')).toBeInTheDocument())
+
+  // "kunci" cocok persis dengan Kunci Pas 12, tapi tools itu ada di kategori
+  // lain. Kalau filter kategori tidak ikut diterapkan, ia akan muncul.
+  await user.click(screen.getByRole('button', { name: 'Alat Ukur' }))
+  await user.type(screen.getByPlaceholderText(/cari tools/i), 'kunci')
+
+  expect(screen.queryByText('Kunci Pas 12')).not.toBeInTheDocument()
+  expect(screen.getByText(/tidak ditemukan/i)).toBeInTheDocument()
+})
+
+test('menampilkan error, bukan "tidak ditemukan", saat data gagal dimuat', async () => {
+  // Tanpa test ini, menghapus penjaga `!error` dari pesan kosong lolos
+  // seluruh suite. Akibatnya MP yang penyimpanannya error diberi tahu
+  // "Tools tidak ditemukan" lalu pergi — mengira tools-nya memang tidak ada,
+  // bukan bahwa aplikasinya rusak.
+  vi.spyOn(MockRepository.prototype, 'getTools').mockRejectedValue(
+    new Error('Penyimpanan rusak'),
+  )
+
+  renderHome()
+
+  await waitFor(() => {
+    expect(screen.getByText('Penyimpanan rusak')).toBeInTheDocument()
+  })
+  expect(screen.queryByText(/tidak ditemukan/i)).not.toBeInTheDocument()
 })
 ```
 
@@ -1758,7 +1794,8 @@ function CategoryChip({
       type="button"
       onClick={onClick}
       aria-pressed={active}
-      className={`h-9 shrink-0 rounded-full px-4 text-sm font-medium ${
+      // h-11 = 44px: batas minimal target sentuh. MP memakai sarung tangan.
+      className={`h-11 shrink-0 rounded-full px-4 text-sm font-medium ${
         active
           ? 'bg-toyota text-white'
           : 'bg-white text-neutral-700 ring-1 ring-neutral-200'
@@ -1795,7 +1832,7 @@ Perbaiki test-nya, **bukan** komponennya — judul dua warna itu desain yang dis
 - [ ] **Step 8: Jalankan test, pastikan LULUS**
 
 Run: `npm test -- Home`
-Expected: PASS (6 test)
+Expected: PASS (8 test)
 
 Lalu seluruh suite: `npm test` — pastikan `App.test.tsx` ikut hijau.
 
