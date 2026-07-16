@@ -25,6 +25,13 @@ describe('matchScore', () => {
     expect(matchScore('kombinasl', 'Tang Kombinasi')).toBe(1)
   })
 
+  test('menemukan kata panjang lewat awalannya yang salah ketik', () => {
+    // Menguji cabang prefix secara khusus: query lebih pendek dari katanya,
+    // sehingga jarak ke kata utuh jauh (>2) dan hanya perbandingan awalan
+    // yang bisa menemukannya. Tanpa cabang itu, ini null.
+    expect(matchScore('termoc', 'Thermocouple Probe')).toBe(2)
+  })
+
   test('menolak kata yang jelas tidak relevan', () => {
     expect(matchScore('palu', 'Kunci Pas 12')).toBeNull()
     expect(matchScore('thermocouple', 'Sekop Pasir')).toBeNull()
@@ -34,18 +41,25 @@ describe('matchScore', () => {
     expect(matchScore('', 'Kunci Pas 12')).toBe(0)
   })
 
-  test('query sangat pendek tidak ditoleransi typo-nya', () => {
-    // Query 3 huruf terlalu pendek — toleransi typo akan mencocokkan
-    // hampir semua hal dan hasilnya jadi sampah.
+  test('query pendek tidak ditoleransi typo-nya', () => {
+    // 3 huruf.
     expect(matchScore('pal', 'Pas')).toBeNull()
+    // 4 huruf: tanpa aturan ini, "pasu" memunculkan tiga tools berbeda dan
+    // "paku" memunculkan Palu Karet.
+    expect(matchScore('pasu', 'Kunci Pas 12')).toBeNull()
+    expect(matchScore('pasu', 'Sekop Pasir')).toBeNull()
+    expect(matchScore('paku', 'Palu Karet')).toBeNull()
   })
 })
 
 describe('searchByName', () => {
+  // Urutan sengaja dibalik: yang cocok fuzzy ditaruh SEBELUM yang cocok
+  // persis. Kalau fixture-nya sudah urut, menghapus sort() tetap membuat
+  // test lulus — dan urutan hasil tidak benar-benar teruji.
   const tools = [
-    { nama: 'Kunci Pas 12' },
-    { nama: 'Tang Kombinasi' },
     { nama: 'Kunsi Inggris' },
+    { nama: 'Tang Kombinasi' },
+    { nama: 'Kunci Pas 12' },
   ]
   const getText = (t: { nama: string }) => t.nama
 
