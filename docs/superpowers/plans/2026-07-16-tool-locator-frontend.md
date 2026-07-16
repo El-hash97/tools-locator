@@ -1062,7 +1062,7 @@ export function formatLocation(location: Location | undefined): string {
 - [ ] **Step 5: Jalankan test, pastikan LULUS**
 
 Run: `npm test -- qr format`
-Expected: PASS (9 test)
+Expected: PASS (11 test)
 
 - [ ] **Step 6: Commit**
 
