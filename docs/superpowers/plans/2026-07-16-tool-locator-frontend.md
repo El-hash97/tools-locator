@@ -1799,7 +1799,7 @@ Expected: PASS (6 test)
 
 Lalu seluruh suite: `npm test` — pastikan `App.test.tsx` ikut hijau.
 
-- [ ] **Step 8: Commit**
+- [ ] **Step 9: Commit**
 
 ```bash
 git add -A
