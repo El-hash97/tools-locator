@@ -750,6 +750,13 @@ describe('matchScore', () => {
     expect(matchScore('kombinasl', 'Tang Kombinasi')).toBe(1)
   })
 
+  test('menemukan kata panjang lewat awalannya yang salah ketik', () => {
+    // Menguji cabang prefix secara khusus: query lebih pendek dari katanya,
+    // sehingga jarak ke kata utuh jauh (>2) dan hanya perbandingan awalan
+    // yang bisa menemukannya. Tanpa cabang itu, ini null.
+    expect(matchScore('termoc', 'Thermocouple Probe')).toBe(2)
+  })
+
   test('menolak kata yang jelas tidak relevan', () => {
     expect(matchScore('palu', 'Kunci Pas 12')).toBeNull()
     expect(matchScore('thermocouple', 'Sekop Pasir')).toBeNull()
@@ -759,18 +766,25 @@ describe('matchScore', () => {
     expect(matchScore('', 'Kunci Pas 12')).toBe(0)
   })
 
-  test('query sangat pendek tidak ditoleransi typo-nya', () => {
-    // Query 3 huruf terlalu pendek — toleransi typo akan mencocokkan
-    // hampir semua hal dan hasilnya jadi sampah.
+  test('query pendek tidak ditoleransi typo-nya', () => {
+    // 3 huruf.
     expect(matchScore('pal', 'Pas')).toBeNull()
+    // 4 huruf: tanpa aturan ini, "pasu" memunculkan tiga tools berbeda dan
+    // "paku" memunculkan Palu Karet.
+    expect(matchScore('pasu', 'Kunci Pas 12')).toBeNull()
+    expect(matchScore('pasu', 'Sekop Pasir')).toBeNull()
+    expect(matchScore('paku', 'Palu Karet')).toBeNull()
   })
 })
 
 describe('searchByName', () => {
+  // Urutan sengaja dibalik: yang cocok fuzzy ditaruh SEBELUM yang cocok
+  // persis. Kalau fixture-nya sudah urut, menghapus sort() tetap membuat
+  // test lulus — dan urutan hasil tidak benar-benar teruji.
   const tools = [
-    { nama: 'Kunci Pas 12' },
-    { nama: 'Tang Kombinasi' },
     { nama: 'Kunsi Inggris' },
+    { nama: 'Tang Kombinasi' },
+    { nama: 'Kunci Pas 12' },
   ]
   const getText = (t: { nama: string }) => t.nama
 
@@ -826,10 +840,14 @@ export function levenshtein(a: string, b: string): number {
   return previous[b.length]
 }
 
-// Query pendek tidak ditoleransi typo-nya: pada kata 3 huruf, jarak 1 sudah
-// mencocokkan hampir apa saja dan hasil pencarian jadi sampah.
+// Query pendek tidak ditoleransi typo-nya. Pada 4 huruf, jarak 1 sudah
+// mencocokkan terlalu banyak: "pasu" akan memunculkan Kunci Pas 12, Sekop
+// Pasir, dan Palu Karet sekaligus, dan "paku" (kata yang sah dan berbeda)
+// memunculkan Palu Karet. Konsekuensinya disengaja: salah ketik pada nama
+// pendek seperti "Palo" tidak ketemu, dan MP mengetik ulang — itu lebih baik
+// daripada disodori tools yang salah.
 export function maxDistanceFor(query: string): number {
-  if (query.length <= 3) return 0
+  if (query.length <= 4) return 0
   if (query.length <= 5) return 1
   return 2
 }
@@ -878,7 +896,7 @@ export function searchByName<T>(
 - [ ] **Step 4: Jalankan test, pastikan LULUS**
 
 Run: `npm test -- fuzzy`
-Expected: PASS (10 test)
+Expected: PASS (11 test)
 
 - [ ] **Step 5: Commit**
 
