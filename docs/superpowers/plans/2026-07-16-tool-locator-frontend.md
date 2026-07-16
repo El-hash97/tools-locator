@@ -974,6 +974,15 @@ describe('parseScannedValue', () => {
     )
   })
 
+  test('menolak id berisi karakter di luar [A-Za-z0-9_-]', () => {
+    // Seluruh alasan keamanan di atas bertumpu pada batasan karakter ini:
+    // tanpa titik dan titik dua, id tidak bisa menjadi protokol, host, atau
+    // path. Tanpa test ini, melebarkan regex akan membuat komentar itu bohong
+    // tanpa ada yang gagal.
+    expect(parseScannedValue('https://x.example/return/a.b:c')).toBeNull()
+    expect(parseScannedValue('../../etc/passwd')).toBeNull()
+  })
+
   test('menerima id UUID dari tools yang dibuat saat runtime', () => {
     // Tools baru memakai crypto.randomUUID(). Kalau regex menolak bentuk ini,
     // label tools yang baru dibuat tidak akan bisa di-scan sama sekali.
@@ -1062,7 +1071,7 @@ export function formatLocation(location: Location | undefined): string {
 - [ ] **Step 5: Jalankan test, pastikan LULUS**
 
 Run: `npm test -- qr format`
-Expected: PASS (11 test)
+Expected: PASS (12 test)
 
 - [ ] **Step 6: Commit**
 
