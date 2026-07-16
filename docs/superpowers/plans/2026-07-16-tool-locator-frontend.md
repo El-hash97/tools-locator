@@ -963,6 +963,24 @@ describe('parseScannedValue', () => {
     expect(parseScannedValue('halo dunia')).toBeNull()
     expect(parseScannedValue('')).toBeNull()
   })
+
+  test('menerima URL dari host lain — disengaja, bukan kelalaian', () => {
+    // Host tidak diperiksa dengan sengaja: id hanya dipakai untuk navigasi
+    // internal, dan memeriksa host akan membuat label yang dicetak sebelum
+    // pindah domain berhenti bisa di-scan. Test ini mengunci keputusan itu
+    // supaya tidak "diperbaiki" tanpa membaca alasannya.
+    expect(parseScannedValue('https://host-lain.example/return/tool-001')).toBe(
+      'tool-001',
+    )
+  })
+
+  test('menerima id UUID dari tools yang dibuat saat runtime', () => {
+    // Tools baru memakai crypto.randomUUID(). Kalau regex menolak bentuk ini,
+    // label tools yang baru dibuat tidak akan bisa di-scan sama sekali.
+    const uuid = '3f2504e0-4f89-11d3-9a0c-0305e82c3301'
+    expect(parseScannedValue(uuid)).toBe(uuid)
+    expect(parseScannedValue(`https://tloc.app/return/${uuid}`)).toBe(uuid)
+  })
 })
 ```
 
@@ -1005,6 +1023,18 @@ export function buildQrUrl(origin: string, toolId: string): string {
 // Menerima dua bentuk: URL penuh dari label cetak (dibuka kamera bawaan HP)
 // dan ID telanjang. Mengembalikan null untuk QR asing — misalnya QR promosi
 // yang kebetulan tertempel di kemasan.
+//
+// Host pada URL sengaja TIDAK diperiksa. Alasannya dua:
+//   1. Id hasil ekstraksi hanya dipakai untuk navigasi internal
+//      (`navigate('/return/<id>')`), tidak pernah untuk membuka host asing
+//      atau mengambil data dari sana. Regex juga membatasi id ke
+//      [A-Za-z0-9_-]+, jadi tidak ada protokol atau path yang bisa diselipkan.
+//   2. Label dicetak memakai origin saat itu. Kalau host diperiksa, seluruh
+//      label yang dicetak sebelum aplikasi pindah domain (misal dari
+//      localhost ke Netlify) akan berhenti bisa di-scan.
+// Ancaman yang tersisa — QR palsu agar tools dikembalikan ke tempat salah —
+// sudah bisa dilakukan siapa pun yang menempel label palsu berisi ID asli,
+// jadi memeriksa host tidak menambah perlindungan nyata.
 export function parseScannedValue(text: string): string | null {
   const raw = text.trim()
   if (raw === '') return null
