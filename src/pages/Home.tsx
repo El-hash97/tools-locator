@@ -112,7 +112,8 @@ function CategoryChip({
       type="button"
       onClick={onClick}
       aria-pressed={active}
-      className={`h-9 shrink-0 rounded-full px-4 text-sm font-medium ${
+      // h-11 = 44px: batas minimal target sentuh. MP memakai sarung tangan.
+      className={`h-11 shrink-0 rounded-full px-4 text-sm font-medium ${
         active
           ? 'bg-toyota text-white'
           : 'bg-white text-neutral-700 ring-1 ring-neutral-200'
