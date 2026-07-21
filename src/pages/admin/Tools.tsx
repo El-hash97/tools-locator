@@ -108,8 +108,14 @@ export default function AdminTools() {
       </div>
 
       {draft && (
+        // noValidate: field jumlah memakai type="number" min={1}. Tanpa ini,
+        // validasi bawaan browser memblokir submit sebelum simpan() sempat
+        // jalan — pesan "Jumlah minimal 1" milik aplikasi tidak pernah
+        // muncul, digantikan tooltip browser yang tidak konsisten dan tidak
+        // berbahasa Indonesia di HP Android.
         <form
           onSubmit={simpan}
+          noValidate
           className="mb-6 space-y-4 rounded-xl bg-white p-4 ring-1 ring-neutral-200"
         >
           <div>
