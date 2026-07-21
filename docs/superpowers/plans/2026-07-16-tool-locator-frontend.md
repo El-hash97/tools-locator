@@ -3026,22 +3026,31 @@ test('menolak simpan saat jumlah kurang dari 1', async () => {
   expect(screen.getByText(/jumlah minimal 1/i)).toBeInTheDocument()
 })
 
-test('mengubah area mengosongkan rak dan level/bin yang sudah dipilih', async () => {
-  // Tanpa reset ini, MP bisa memilih Area baru sambil Rak/Level-Bin masih
-  // menunjuk lokasi di Area lama — kombinasi yang tidak pernah ada.
+test('mengubah area membuat lokasi lama tidak lagi valid untuk disimpan', async () => {
+  // Memeriksa nilai tampilan select bisa menyesatkan: opsi lama otomatis
+  // hilang dari daftar begitu Area berubah, jadi select TERLIHAT kosong
+  // walau location_id di balik layar masih menunjuk lokasi Area sebelumnya.
+  // Yang benar-benar membuktikan resetnya: submit tanpa memilih ulang
+  // Rak/Level-Bin. Kalau location_id tidak benar-benar dikosongkan, ini
+  // akan lolos tersimpan dengan lokasi dari Area yang salah, bukan gagal
+  // dengan pesan validasi.
   const user = userEvent.setup()
   renderAdmin()
   await waitFor(() => expect(screen.getByText('Kunci Pas 12')).toBeInTheDocument())
 
   await user.click(screen.getByRole('button', { name: /tambah tools/i }))
+  await user.type(screen.getByLabelText(/nama tools/i), 'Kuas Coating')
+  await user.selectOptions(screen.getByLabelText(/kategori/i), 'cat-pouring')
   await user.selectOptions(screen.getByLabelText(/^area$/i), 'Melting')
   await user.selectOptions(screen.getByLabelText(/^rak$/i), 'Rak A')
   await user.selectOptions(screen.getByLabelText(/level \/ bin/i), 'loc-melting-a1')
 
   await user.selectOptions(screen.getByLabelText(/^area$/i), 'Pouring')
+  await user.click(screen.getByRole('button', { name: /simpan/i }))
 
-  expect(screen.getByLabelText(/^rak$/i)).toHaveValue('')
-  expect(screen.getByLabelText(/level \/ bin/i)).toHaveValue('')
+  expect(
+    screen.getByText(/lokasi wajib dipilih sampai level \/ bin/i),
+  ).toBeInTheDocument()
 })
 
 test('membatalkan hapus saat konfirmasi ditolak', async () => {
@@ -3301,8 +3310,14 @@ export default function AdminTools() {
       </div>
 
       {draft && (
+        // noValidate: field jumlah memakai type="number" min={1}. Tanpa ini,
+        // validasi bawaan browser memblokir submit sebelum simpan() sempat
+        // jalan — pesan "Jumlah minimal 1" milik aplikasi tidak pernah
+        // muncul, digantikan tooltip browser yang tidak konsisten dan tidak
+        // berbahasa Indonesia di HP Android.
         <form
           onSubmit={simpan}
+          noValidate
           className="mb-6 space-y-4 rounded-xl bg-white p-4 ring-1 ring-neutral-200"
         >
           <div>
