@@ -61,3 +61,19 @@ test('menolak kode yang tidak dikenali', async () => {
 
   expect(screen.getByText(/kode tidak dikenali/i)).toBeInTheDocument()
 })
+
+test('menghentikan kamera saat halaman ditinggalkan', async () => {
+  // Tanpa test ini, menghapus scanner.stop() dari cleanup unmount lolos
+  // seluruh suite — dan kamera tetap menyala setelah MP pindah halaman.
+  const { unmount } = renderScan()
+
+  await waitFor(() => {
+    expect(startMock).toHaveBeenCalled()
+  })
+
+  unmount()
+
+  await waitFor(() => {
+    expect(stopMock).toHaveBeenCalled()
+  })
+})
