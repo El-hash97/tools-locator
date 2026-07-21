@@ -3025,7 +3025,7 @@ export function PhotoInput({ label, value, onChange }: Props) {
         accept="image/*"
         capture="environment"
         onChange={pick}
-        className="block w-full text-sm text-neutral-600 file:mr-3 file:h-10 file:rounded-lg file:border-0 file:bg-neutral-100 file:px-3 file:font-medium"
+        className="block w-full text-sm text-neutral-600 file:mr-3 file:h-11 file:rounded-lg file:border-0 file:bg-neutral-100 file:px-3 file:font-medium"
       />
 
       {error && <p className="mt-1 text-sm text-toyota">{error}</p>}
@@ -3068,7 +3068,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
           <button
             type="button"
             onClick={keluar}
-            className="flex h-10 items-center gap-2 rounded-full px-3 text-sm text-neutral-600 active:bg-neutral-200"
+            className="flex h-11 items-center gap-2 rounded-full px-3 text-sm text-neutral-600 active:bg-neutral-200"
           >
             <LogOut className="h-4 w-4" aria-hidden="true" />
             Keluar
@@ -3081,7 +3081,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
               key={tab.to}
               to={tab.to}
               className={({ isActive }) =>
-                `h-9 shrink-0 rounded-full px-4 text-sm font-medium leading-9 ${
+                `flex h-11 shrink-0 items-center justify-center rounded-full px-4 text-sm font-medium ${
                   isActive
                     ? 'bg-toyota text-white'
                     : 'bg-white text-neutral-700 ring-1 ring-neutral-200'
@@ -3205,7 +3205,7 @@ export default function AdminTools() {
         <button
           type="button"
           onClick={mulaiTambah}
-          className="h-10 rounded-xl bg-toyota px-4 text-sm font-semibold text-white active:bg-toyota-dark"
+          className="h-11 rounded-xl bg-toyota px-4 text-sm font-semibold text-white active:bg-toyota-dark"
         >
           Tambah tools
         </button>
@@ -3418,14 +3418,14 @@ export default function AdminTools() {
             <button
               type="button"
               onClick={() => mulaiUbah(tool)}
-              className="h-10 rounded-lg px-3 text-sm font-medium text-neutral-700 ring-1 ring-neutral-300"
+              className="h-11 rounded-lg px-3 text-sm font-medium text-neutral-700 ring-1 ring-neutral-300"
             >
               Ubah
             </button>
             <button
               type="button"
               onClick={() => hapus(tool)}
-              className="h-10 rounded-lg px-3 text-sm font-medium text-toyota ring-1 ring-toyota/30"
+              className="h-11 rounded-lg px-3 text-sm font-medium text-toyota ring-1 ring-toyota/30"
             >
               Hapus
             </button>
@@ -3618,7 +3618,7 @@ export default function AdminCategories() {
             <button
               type="button"
               onClick={() => hapus(category)}
-              className="h-10 rounded-lg px-3 text-sm font-medium text-toyota ring-1 ring-toyota/30"
+              className="h-11 rounded-lg px-3 text-sm font-medium text-toyota ring-1 ring-toyota/30"
             >
               Hapus
             </button>
@@ -3869,7 +3869,7 @@ export default function AdminLocations() {
             <button
               type="button"
               onClick={() => hapus(location)}
-              className="h-10 rounded-lg px-3 text-sm font-medium text-toyota ring-1 ring-toyota/30"
+              className="h-11 rounded-lg px-3 text-sm font-medium text-toyota ring-1 ring-toyota/30"
             >
               Hapus
             </button>
@@ -4003,7 +4003,7 @@ export default function AdminLabels() {
         <button
           type="button"
           onClick={() => cetak()}
-          className="flex h-10 items-center gap-2 rounded-xl bg-toyota px-4 text-sm font-semibold text-white active:bg-toyota-dark"
+          className="flex h-11 items-center gap-2 rounded-xl bg-toyota px-4 text-sm font-semibold text-white active:bg-toyota-dark"
         >
           <Printer className="h-4 w-4" aria-hidden="true" />
           Cetak
