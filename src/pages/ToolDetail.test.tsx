@@ -1,10 +1,15 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
-import { beforeEach, expect, test } from 'vitest'
+import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import App from '@/App'
+import { MockRepository } from '@/data/mockRepository'
 
 beforeEach(() => {
   localStorage.clear()
+})
+
+afterEach(() => {
+  vi.restoreAllMocks()
 })
 
 function renderAt(path: string) {
@@ -46,4 +51,20 @@ test('memberi pesan jelas saat tools tidak ada', async () => {
     expect(screen.getByText(/tools tidak ditemukan/i)).toBeInTheDocument()
   })
   expect(screen.getByRole('link', { name: /kembali ke pencarian/i })).toBeInTheDocument()
+})
+
+test('menampilkan error, bukan "tidak ditemukan", saat data gagal dimuat', async () => {
+  // Tanpa cabang error di komponen, tools valid yang gagal dimuat (localStorage
+  // rusak, dsb.) terlihat sama seperti tools yang sudah dihapus admin — pesan
+  // yang salah menutupi error sungguhan.
+  vi.spyOn(MockRepository.prototype, 'getTools').mockRejectedValue(
+    new Error('Penyimpanan rusak'),
+  )
+
+  renderAt('/tools/tool-005')
+
+  await waitFor(() => {
+    expect(screen.getByText(/gagal memuat data/i)).toBeInTheDocument()
+  })
+  expect(screen.queryByText(/tools tidak ditemukan/i)).not.toBeInTheDocument()
 })
