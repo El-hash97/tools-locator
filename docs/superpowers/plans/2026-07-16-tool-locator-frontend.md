@@ -1963,7 +1963,7 @@ export default function ToolDetail() {
         <Link
           to="/"
           aria-label="Kembali"
-          className="flex h-10 w-10 items-center justify-center rounded-full text-neutral-600 active:bg-neutral-200"
+          className="flex h-11 w-11 items-center justify-center rounded-full text-neutral-600 active:bg-neutral-200"
         >
           <ArrowLeft className="h-5 w-5" aria-hidden="true" />
         </Link>
@@ -2386,7 +2386,7 @@ export default function Scan() {
         <Link
           to="/"
           aria-label="Kembali"
-          className="flex h-10 w-10 items-center justify-center rounded-full text-neutral-600 active:bg-neutral-200"
+          className="flex h-11 w-11 items-center justify-center rounded-full text-neutral-600 active:bg-neutral-200"
         >
           <ArrowLeft className="h-5 w-5" aria-hidden="true" />
         </Link>
@@ -2682,7 +2682,7 @@ export default function Login() {
         <Link
           to="/"
           aria-label="Kembali"
-          className="flex h-10 w-10 items-center justify-center rounded-full text-neutral-600 active:bg-neutral-200"
+          className="flex h-11 w-11 items-center justify-center rounded-full text-neutral-600 active:bg-neutral-200"
         >
           <ArrowLeft className="h-5 w-5" aria-hidden="true" />
         </Link>
