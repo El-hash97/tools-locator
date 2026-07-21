@@ -2968,6 +2968,95 @@ test('menampilkan pratinjau QR saat mengubah tools', async () => {
 
   expect(screen.getByTestId('qr-preview')).toBeInTheDocument()
 })
+
+test('tidak menampilkan pratinjau QR saat menambah tools baru', async () => {
+  // QR dibuat dari id tools, dan tools baru belum punya id sampai disimpan.
+  // Tanpa test ini, memaksa pratinjau selalu tampil tetap lolos.
+  const user = userEvent.setup()
+  renderAdmin()
+  await waitFor(() => expect(screen.getByText('Kunci Pas 12')).toBeInTheDocument())
+
+  await user.click(screen.getByRole('button', { name: /tambah tools/i }))
+
+  expect(screen.queryByTestId('qr-preview')).not.toBeInTheDocument()
+})
+
+test('menolak simpan saat kategori belum dipilih', async () => {
+  const user = userEvent.setup()
+  renderAdmin()
+  await waitFor(() => expect(screen.getByText('Kunci Pas 12')).toBeInTheDocument())
+
+  await user.click(screen.getByRole('button', { name: /tambah tools/i }))
+  await user.type(screen.getByLabelText(/nama tools/i), 'Kuas Coating')
+  await user.click(screen.getByRole('button', { name: /simpan/i }))
+
+  expect(screen.getByText(/kategori wajib dipilih/i)).toBeInTheDocument()
+})
+
+test('menolak simpan saat lokasi belum lengkap dipilih', async () => {
+  const user = userEvent.setup()
+  renderAdmin()
+  await waitFor(() => expect(screen.getByText('Kunci Pas 12')).toBeInTheDocument())
+
+  await user.click(screen.getByRole('button', { name: /tambah tools/i }))
+  await user.type(screen.getByLabelText(/nama tools/i), 'Kuas Coating')
+  await user.selectOptions(screen.getByLabelText(/kategori/i), 'cat-pouring')
+  await user.click(screen.getByRole('button', { name: /simpan/i }))
+
+  expect(
+    screen.getByText(/lokasi wajib dipilih sampai level \/ bin/i),
+  ).toBeInTheDocument()
+})
+
+test('menolak simpan saat jumlah kurang dari 1', async () => {
+  const user = userEvent.setup()
+  renderAdmin()
+  await waitFor(() => expect(screen.getByText('Kunci Pas 12')).toBeInTheDocument())
+
+  await user.click(screen.getByRole('button', { name: /tambah tools/i }))
+  await user.type(screen.getByLabelText(/nama tools/i), 'Kuas Coating')
+  await user.selectOptions(screen.getByLabelText(/kategori/i), 'cat-pouring')
+  await user.selectOptions(screen.getByLabelText(/^area$/i), 'Pouring')
+  await user.selectOptions(screen.getByLabelText(/^rak$/i), 'Rak B')
+  await user.selectOptions(screen.getByLabelText(/level \/ bin/i), 'loc-pouring-b1')
+  await user.clear(screen.getByLabelText(/jumlah/i))
+  await user.type(screen.getByLabelText(/jumlah/i), '0')
+  await user.click(screen.getByRole('button', { name: /simpan/i }))
+
+  expect(screen.getByText(/jumlah minimal 1/i)).toBeInTheDocument()
+})
+
+test('mengubah area mengosongkan rak dan level/bin yang sudah dipilih', async () => {
+  // Tanpa reset ini, MP bisa memilih Area baru sambil Rak/Level-Bin masih
+  // menunjuk lokasi di Area lama — kombinasi yang tidak pernah ada.
+  const user = userEvent.setup()
+  renderAdmin()
+  await waitFor(() => expect(screen.getByText('Kunci Pas 12')).toBeInTheDocument())
+
+  await user.click(screen.getByRole('button', { name: /tambah tools/i }))
+  await user.selectOptions(screen.getByLabelText(/^area$/i), 'Melting')
+  await user.selectOptions(screen.getByLabelText(/^rak$/i), 'Rak A')
+  await user.selectOptions(screen.getByLabelText(/level \/ bin/i), 'loc-melting-a1')
+
+  await user.selectOptions(screen.getByLabelText(/^area$/i), 'Pouring')
+
+  expect(screen.getByLabelText(/^rak$/i)).toHaveValue('')
+  expect(screen.getByLabelText(/level \/ bin/i)).toHaveValue('')
+})
+
+test('membatalkan hapus saat konfirmasi ditolak', async () => {
+  // Tanpa test ini, menghapus penjagaan window.confirm tetap lolos —
+  // dan tools terhapus tanpa persetujuan MP.
+  const user = userEvent.setup()
+  vi.spyOn(window, 'confirm').mockReturnValue(false)
+  renderAdmin()
+  await waitFor(() => expect(screen.getByText('Sekop Pasir')).toBeInTheDocument())
+
+  const row = screen.getByText('Sekop Pasir').closest('li')!
+  await user.click(within(row).getByRole('button', { name: /hapus/i }))
+
+  expect(screen.getByText('Sekop Pasir')).toBeInTheDocument()
+})
 ```
 
 - [ ] **Step 2: Jalankan test, pastikan GAGAL**
