@@ -1865,11 +1865,16 @@ Tulis `src/pages/ToolDetail.test.tsx`:
 ```tsx
 import { render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
-import { beforeEach, expect, test } from 'vitest'
+import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import App from '@/App'
+import { MockRepository } from '@/data/mockRepository'
 
 beforeEach(() => {
   localStorage.clear()
+})
+
+afterEach(() => {
+  vi.restoreAllMocks()
 })
 
 function renderAt(path: string) {
@@ -1912,6 +1917,22 @@ test('memberi pesan jelas saat tools tidak ada', async () => {
   })
   expect(screen.getByRole('link', { name: /kembali ke pencarian/i })).toBeInTheDocument()
 })
+
+test('menampilkan error, bukan "tidak ditemukan", saat data gagal dimuat', async () => {
+  // Tanpa cabang error di komponen, tools valid yang gagal dimuat (localStorage
+  // rusak, dsb.) terlihat sama seperti tools yang sudah dihapus admin — pesan
+  // yang salah menutupi error sungguhan.
+  vi.spyOn(MockRepository.prototype, 'getTools').mockRejectedValue(
+    new Error('Penyimpanan rusak'),
+  )
+
+  renderAt('/tools/tool-005')
+
+  await waitFor(() => {
+    expect(screen.getByText(/gagal memuat data/i)).toBeInTheDocument()
+  })
+  expect(screen.queryByText(/tools tidak ditemukan/i)).not.toBeInTheDocument()
+})
 ```
 
 - [ ] **Step 2: Jalankan test, pastikan GAGAL**
@@ -1929,9 +1950,29 @@ import { formatLocation } from '@/lib/format'
 
 export default function ToolDetail() {
   const { id } = useParams<{ id: string }>()
-  const { tools, categories, locations, loading } = useData()
+  const { tools, categories, locations, loading, error } = useData()
 
   if (loading) return <p className="p-6 text-center text-neutral-500">Memuat…</p>
+
+  // Diperiksa SEBELUM "tidak ditemukan": tanpa ini, kegagalan memuat data
+  // (localStorage rusak, dsb.) membuat tools valid terlihat seperti sudah
+  // dihapus admin — pesan yang salah menutupi error sungguhan.
+  if (error) {
+    return (
+      <div className="mx-auto max-w-2xl p-6 text-center">
+        <p className="mb-4 text-lg font-semibold text-neutral-900">
+          Gagal memuat data
+        </p>
+        <p className="mb-6 text-sm text-neutral-500">{error}</p>
+        <Link
+          to="/"
+          className="inline-flex h-12 items-center rounded-xl bg-toyota px-5 font-semibold text-white"
+        >
+          Kembali ke pencarian
+        </Link>
+      </div>
+    )
+  }
 
   const tool = tools.find((t) => t.id === id)
 
@@ -2033,7 +2074,7 @@ Tambahkan `import ToolDetail from '@/pages/ToolDetail'` dan ganti rute detail me
 - [ ] **Step 5: Jalankan test, pastikan LULUS**
 
 Run: `npm test -- ToolDetail`
-Expected: PASS (3 test)
+Expected: PASS (4 test)
 
 - [ ] **Step 6: Commit**
 
@@ -2064,11 +2105,16 @@ Tulis `src/pages/Return.test.tsx`:
 ```tsx
 import { render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
-import { beforeEach, expect, test } from 'vitest'
+import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import App from '@/App'
+import { MockRepository } from '@/data/mockRepository'
 
 beforeEach(() => {
   localStorage.clear()
+})
+
+afterEach(() => {
+  vi.restoreAllMocks()
 })
 
 function renderAt(path: string) {
@@ -2099,6 +2145,22 @@ test('memberi pesan jelas saat QR menunjuk tools yang sudah dihapus', async () =
   expect(screen.getByRole('link', { name: /kembali ke pencarian/i })).toBeInTheDocument()
 })
 
+test('menampilkan error, bukan "tidak ditemukan", saat data gagal dimuat', async () => {
+  // Ini halaman yang dilihat MP tepat setelah scan QR untuk mengembalikan
+  // tools. Tanpa cabang error, kegagalan memuat data terlihat sama seperti
+  // QR yang tidak dikenali — pesan yang salah di momen paling penting.
+  vi.spyOn(MockRepository.prototype, 'getTools').mockRejectedValue(
+    new Error('Penyimpanan rusak'),
+  )
+
+  renderAt('/return/tool-001')
+
+  await waitFor(() => {
+    expect(screen.getByText(/gagal memuat data/i)).toBeInTheDocument()
+  })
+  expect(screen.queryByText(/tools tidak ditemukan/i)).not.toBeInTheDocument()
+})
+
 test('memberi tahu saat foto penempatan belum diunggah', async () => {
   renderAt('/return/tool-001')
 
@@ -2123,9 +2185,30 @@ import { formatLocation } from '@/lib/format'
 
 export default function Return() {
   const { id } = useParams<{ id: string }>()
-  const { tools, locations, loading } = useData()
+  const { tools, locations, loading, error } = useData()
 
   if (loading) return <p className="p-6 text-center text-neutral-500">Memuat…</p>
+
+  // Diperiksa SEBELUM "tidak ditemukan": tanpa ini, MP yang baru saja scan QR
+  // untuk mengembalikan tools akan melihat "QR ini tidak dikenali" saat
+  // sebenarnya penyimpanan gagal dimuat — pesan yang salah dan menyesatkan
+  // persis di momen paling penting (mengembalikan tools).
+  if (error) {
+    return (
+      <div className="mx-auto max-w-2xl p-6 text-center">
+        <p className="mb-4 text-lg font-semibold text-neutral-900">
+          Gagal memuat data
+        </p>
+        <p className="mb-6 text-sm text-neutral-500">{error}</p>
+        <Link
+          to="/"
+          className="inline-flex h-12 items-center rounded-xl bg-toyota px-5 font-semibold text-white"
+        >
+          Kembali ke pencarian
+        </Link>
+      </div>
+    )
+  }
 
   const tool = tools.find((t) => t.id === id)
 
@@ -2222,7 +2305,7 @@ Tambahkan `import Return from '@/pages/Return'` dan ganti rute pengembalian menj
 - [ ] **Step 5: Jalankan test, pastikan LULUS**
 
 Run: `npm test -- Return`
-Expected: PASS (3 test)
+Expected: PASS (4 test)
 
 - [ ] **Step 6: Commit**
 
