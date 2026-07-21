@@ -35,7 +35,7 @@ export default function Home() {
           <Link
             to="/admin"
             aria-label="Panel admin"
-            className="flex h-10 w-10 items-center justify-center rounded-full text-neutral-500 active:bg-neutral-200"
+            className="flex h-11 w-11 items-center justify-center rounded-full text-neutral-500 active:bg-neutral-200"
           >
             <Settings className="h-5 w-5" aria-hidden="true" />
           </Link>
