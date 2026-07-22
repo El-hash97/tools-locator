@@ -10,6 +10,7 @@ import Login from '@/pages/admin/Login'
 import AdminTools from '@/pages/admin/Tools'
 import AdminCategories from '@/pages/admin/Categories'
 import AdminLocations from '@/pages/admin/Locations'
+import AdminLabels from '@/pages/admin/Labels'
 
 export default function App() {
   return (
@@ -42,6 +43,14 @@ export default function App() {
             element={
               <RequireAuth>
                 <AdminLocations />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/admin/labels"
+            element={
+              <RequireAuth>
+                <AdminLabels />
               </RequireAuth>
             }
           />
