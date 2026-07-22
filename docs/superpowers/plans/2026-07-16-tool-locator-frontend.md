@@ -4085,7 +4085,7 @@ Memenuhi FR-A6. Ingat: `react-to-print` v3 memakai `useReactToPrint({ contentRef
 Tulis `src/pages/admin/Labels.test.tsx`:
 
 ```tsx
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, expect, test } from 'vitest'
 import App from '@/App'
@@ -4119,6 +4119,34 @@ test('setiap label memuat nama dan lokasi tools', async () => {
     expect(screen.getByText('Kunci Pas 12')).toBeInTheDocument()
   })
   expect(screen.getAllByText('Melting · Rak A · Level 1').length).toBeGreaterThan(0)
+})
+
+test('setiap label memasangkan nama tools dengan lokasi yang benar', async () => {
+  // Test di atas hanya membuktikan sebuah teks lokasi muncul di suatu
+  // tempat di halaman — bukan bahwa ia berpasangan dengan tools yang
+  // benar. Memeriksa hanya 1-2 tools sampel tidak cukup: menukar lokasi
+  // antara dua tools LAIN yang tidak ikut diperiksa tetap lolos. Test ini
+  // menyapu seluruh 8 tools seed sekaligus.
+  renderPage()
+  await waitFor(() => {
+    expect(screen.getAllByTestId('qr-label')).toHaveLength(8)
+  })
+
+  const pasangan: Array<[string, string]> = [
+    ['Kunci Pas 12', 'Melting · Rak A · Level 1'],
+    ['Tang Kombinasi', 'Melting · Rak A · Level 1'],
+    ['Palu Karet', 'Melting · Rak A · Level 2'],
+    ['Sarung Tangan Tahan Panas', 'Melting · Rak A · Level 2'],
+    ['Thermocouple Probe', 'Analysis · Rak C · Level 1'],
+    ['Gelas Ukur Sampel', 'Analysis · Rak C · Level 1'],
+    ['Ladle Skimmer', 'Pouring · Rak B · Level 1'],
+    ['Sekop Pasir', 'Pouring · Rak B · Bin 3'],
+  ]
+
+  for (const [nama, lokasi] of pasangan) {
+    const label = screen.getByText(nama).closest('[data-testid="qr-label"]')
+    expect(within(label as HTMLElement).getByText(lokasi)).toBeInTheDocument()
+  }
 })
 
 test('menyediakan tombol cetak', async () => {
