@@ -2417,6 +2417,28 @@ test('menghentikan kamera saat halaman ditinggalkan', async () => {
     expect(stopMock).toHaveBeenCalled()
   })
 })
+
+test('membersihkan scanner dengan aman walau start() belum selesai saat unmount', async () => {
+  // Bug nyata di browser sungguhan (ditemukan di Task 18, tidak mungkin
+  // tertangkap mock lama yang selalu mockResolvedValue): StrictMode
+  // me-mount efek dua kali — mount pertama langsung di-cleanup sebelum
+  // start() sempat selesai. html5-qrcode melempar error SINKRON kalau
+  // stop() dipanggil sebelum scanner benar-benar berjalan, dan .catch()
+  // tidak menangkapnya — seluruh halaman crash jadi layar kosong, persis
+  // saat kamera gagal dan fallback manual paling dibutuhkan.
+  startMock.mockReturnValue(new Promise(() => {})) // sengaja tidak pernah selesai
+  stopMock.mockImplementation(() => {
+    throw new Error('Cannot stop, scanner is not running or paused.')
+  })
+
+  const { unmount } = renderScan()
+
+  await waitFor(() => {
+    expect(startMock).toHaveBeenCalled()
+  })
+
+  expect(() => unmount()).not.toThrow()
+})
 ```
 
 - [ ] **Step 2: Jalankan test, pastikan GAGAL**
@@ -2466,7 +2488,17 @@ export default function Scan() {
 
     return () => {
       cancelled = true
-      scanner.stop().catch(() => {})
+      try {
+        // stop() bisa melempar SINKRON — bukan sekadar menolak Promise —
+        // kalau dipanggil sebelum start() pernah berhasil (misalnya
+        // StrictMode membersihkan efek sebelum start() sempat selesai).
+        // .catch() saja tidak menangkap lemparan sinkron; tanpa try/catch
+        // ini, seluruh halaman crash jadi layar kosong — persis saat
+        // kamera gagal, kondisi yang paling butuh jalan keluar.
+        scanner.stop().catch(() => {})
+      } catch {
+        // diamkan — scanner memang belum pernah berjalan.
+      }
     }
   }, [navigate])
 
@@ -2559,7 +2591,7 @@ Tambahkan `import Scan from '@/pages/Scan'` dan ganti rute scan menjadi:
 - [ ] **Step 5: Jalankan test, pastikan LULUS**
 
 Run: `npm test -- Scan`
-Expected: PASS (4 test)
+Expected: PASS (5 test)
 
 - [ ] **Step 6: Commit**
 
