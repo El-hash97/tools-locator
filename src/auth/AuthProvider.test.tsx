@@ -41,7 +41,7 @@ test('mengalihkan ke daftar tools setelah login berhasil', async () => {
   const user = userEvent.setup()
   renderAt('/admin')
 
-  await user.type(screen.getByLabelText(/email/i), 'admin@tmmin.local')
+  await user.type(screen.getByLabelText(/email/i), 'admin')
   await user.type(screen.getByLabelText(/kata sandi/i), 'admin123')
   await user.click(screen.getByRole('button', { name: /masuk/i }))
 
