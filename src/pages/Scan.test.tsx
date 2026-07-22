@@ -77,3 +77,25 @@ test('menghentikan kamera saat halaman ditinggalkan', async () => {
     expect(stopMock).toHaveBeenCalled()
   })
 })
+
+test('membersihkan scanner dengan aman walau start() belum selesai saat unmount', async () => {
+  // Bug nyata di browser sungguhan (ditemukan di Task 18, tidak mungkin
+  // tertangkap mock lama yang selalu mockResolvedValue): StrictMode
+  // me-mount efek dua kali — mount pertama langsung di-cleanup sebelum
+  // start() sempat selesai. html5-qrcode melempar error SINKRON kalau
+  // stop() dipanggil sebelum scanner benar-benar berjalan, dan .catch()
+  // tidak menangkapnya — seluruh halaman crash jadi layar kosong, persis
+  // saat kamera gagal dan fallback manual paling dibutuhkan.
+  startMock.mockReturnValue(new Promise(() => {})) // sengaja tidak pernah selesai
+  stopMock.mockImplementation(() => {
+    throw new Error('Cannot stop, scanner is not running or paused.')
+  })
+
+  const { unmount } = renderScan()
+
+  await waitFor(() => {
+    expect(startMock).toHaveBeenCalled()
+  })
+
+  expect(() => unmount()).not.toThrow()
+})

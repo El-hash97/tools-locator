@@ -37,7 +37,17 @@ export default function Scan() {
 
     return () => {
       cancelled = true
-      scanner.stop().catch(() => {})
+      try {
+        // stop() bisa melempar SINKRON — bukan sekadar menolak Promise —
+        // kalau dipanggil sebelum start() pernah berhasil (misalnya
+        // StrictMode membersihkan efek sebelum start() sempat selesai).
+        // .catch() saja tidak menangkap lemparan sinkron; tanpa try/catch
+        // ini, seluruh halaman crash jadi layar kosong — persis saat
+        // kamera gagal, kondisi yang paling butuh jalan keluar.
+        scanner.stop().catch(() => {})
+      } catch {
+        // diamkan — scanner memang belum pernah berjalan.
+      }
     }
   }, [navigate])
 
