@@ -9,6 +9,7 @@ import Return from '@/pages/Return'
 import Login from '@/pages/admin/Login'
 import AdminTools from '@/pages/admin/Tools'
 import AdminCategories from '@/pages/admin/Categories'
+import AdminLocations from '@/pages/admin/Locations'
 
 export default function App() {
   return (
@@ -33,6 +34,14 @@ export default function App() {
             element={
               <RequireAuth>
                 <AdminCategories />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/admin/locations"
+            element={
+              <RequireAuth>
+                <AdminLocations />
               </RequireAuth>
             }
           />
