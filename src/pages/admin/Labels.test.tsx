@@ -43,27 +43,32 @@ test('setiap label memuat nama dan lokasi tools', async () => {
 // lokasi berbeda (Sekop Pasir → Pouring · Rak B · Bin 3, Thermocouple Probe
 // → Analysis · Rak C · Level 1) sehingga penukaran lokasi antar-label akan
 // terdeteksi.
-test('setiap label memasangkan nama dan lokasi tools miliknya sendiri', async () => {
+test('setiap label memasangkan nama tools dengan lokasi yang benar', async () => {
+  // Test di atas hanya membuktikan sebuah teks lokasi muncul di suatu
+  // tempat di halaman — bukan bahwa ia berpasangan dengan tools yang
+  // benar. Memeriksa hanya 1-2 tools sampel tidak cukup: menukar lokasi
+  // antara dua tools LAIN yang tidak ikut diperiksa tetap lolos. Test ini
+  // menyapu seluruh 8 tools seed sekaligus.
   renderPage()
   await waitFor(() => {
     expect(screen.getAllByTestId('qr-label')).toHaveLength(8)
   })
 
-  const labels = screen.getAllByTestId('qr-label')
+  const pasangan: Array<[string, string]> = [
+    ['Kunci Pas 12', 'Melting · Rak A · Level 1'],
+    ['Tang Kombinasi', 'Melting · Rak A · Level 1'],
+    ['Palu Karet', 'Melting · Rak A · Level 2'],
+    ['Sarung Tangan Tahan Panas', 'Melting · Rak A · Level 2'],
+    ['Thermocouple Probe', 'Analysis · Rak C · Level 1'],
+    ['Gelas Ukur Sampel', 'Analysis · Rak C · Level 1'],
+    ['Ladle Skimmer', 'Pouring · Rak B · Level 1'],
+    ['Sekop Pasir', 'Pouring · Rak B · Bin 3'],
+  ]
 
-  const sekopLabel = labels.find((label) => within(label).queryByText('Sekop Pasir'))
-  expect(sekopLabel).toBeDefined()
-  expect(
-    within(sekopLabel!).getByText('Pouring · Rak B · Bin 3'),
-  ).toBeInTheDocument()
-
-  const thermoLabel = labels.find((label) =>
-    within(label).queryByText('Thermocouple Probe'),
-  )
-  expect(thermoLabel).toBeDefined()
-  expect(
-    within(thermoLabel!).getByText('Analysis · Rak C · Level 1'),
-  ).toBeInTheDocument()
+  for (const [nama, lokasi] of pasangan) {
+    const label = screen.getByText(nama).closest('[data-testid="qr-label"]')
+    expect(within(label as HTMLElement).getByText(lokasi)).toBeInTheDocument()
+  }
 })
 
 test('menyediakan tombol cetak', async () => {
