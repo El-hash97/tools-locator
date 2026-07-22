@@ -8,6 +8,7 @@ import Scan from '@/pages/Scan'
 import Return from '@/pages/Return'
 import Login from '@/pages/admin/Login'
 import AdminTools from '@/pages/admin/Tools'
+import AdminCategories from '@/pages/admin/Categories'
 
 export default function App() {
   return (
@@ -24,6 +25,14 @@ export default function App() {
             element={
               <RequireAuth>
                 <AdminTools />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/admin/categories"
+            element={
+              <RequireAuth>
+                <AdminCategories />
               </RequireAuth>
             }
           />
