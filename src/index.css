@@ -12,3 +12,20 @@ html, body, #root {
 body {
   @apply bg-neutral-50 text-neutral-900 antialiased;
 }
+
+@media print {
+  body {
+    background: white;
+  }
+
+  .print-sheet {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8mm;
+  }
+}
+
+@page {
+  size: A4;
+  margin: 10mm;
+}
