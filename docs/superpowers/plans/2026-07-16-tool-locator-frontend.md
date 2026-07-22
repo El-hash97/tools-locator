@@ -3833,6 +3833,26 @@ test('menolak simpan saat ada bagian lokasi yang kosong', async () => {
   ).toBeInTheDocument()
 })
 
+test('menolak simpan saat area kosong meski rak dan level/bin terisi', async () => {
+  // Test di atas hanya mengisi Area dan mengosongkan Rak/Level-Bin — tidak
+  // pernah membuktikan Area sendiri diperiksa. Tanpa test ini, menghapus
+  // pemeriksaan Area secara khusus (dan hanya menyisakan Rak/Level-Bin)
+  // tetap lolos.
+  const user = userEvent.setup()
+  renderPage()
+  await waitFor(() =>
+    expect(screen.getByText('Melting · Rak A · Level 1')).toBeInTheDocument(),
+  )
+
+  await user.type(screen.getByLabelText(/^rak$/i), 'Rak Z')
+  await user.type(screen.getByLabelText(/level \/ bin/i), 'Level Z')
+  await user.click(screen.getByRole('button', { name: /tambah lokasi/i }))
+
+  expect(
+    screen.getByText(/area, rak, dan level \/ bin wajib diisi/i),
+  ).toBeInTheDocument()
+})
+
 test('menolak hapus lokasi yang masih dipakai tools', async () => {
   const user = userEvent.setup()
   vi.spyOn(window, 'confirm').mockReturnValue(true)
