@@ -11,50 +11,56 @@ import AdminTools from '@/pages/admin/Tools'
 import AdminCategories from '@/pages/admin/Categories'
 import AdminLocations from '@/pages/admin/Locations'
 import AdminLabels from '@/pages/admin/Labels'
+import Footer from '@/components/Footer'
 
 export default function App() {
   return (
     <DataProvider>
       <AuthProvider>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/tools/:id" element={<ToolDetail />} />
-          <Route path="/scan" element={<Scan />} />
-          <Route path="/return/:id" element={<Return />} />
-          <Route path="/admin" element={<Login />} />
-          <Route
-            path="/admin/tools"
-            element={
-              <RequireAuth>
-                <AdminTools />
-              </RequireAuth>
-            }
-          />
-          <Route
-            path="/admin/categories"
-            element={
-              <RequireAuth>
-                <AdminCategories />
-              </RequireAuth>
-            }
-          />
-          <Route
-            path="/admin/locations"
-            element={
-              <RequireAuth>
-                <AdminLocations />
-              </RequireAuth>
-            }
-          />
-          <Route
-            path="/admin/labels"
-            element={
-              <RequireAuth>
-                <AdminLabels />
-              </RequireAuth>
-            }
-          />
-        </Routes>
+        <div className="flex flex-col min-h-screen">
+          <main className="flex-1">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/tools/:id" element={<ToolDetail />} />
+              <Route path="/scan" element={<Scan />} />
+              <Route path="/return/:id" element={<Return />} />
+              <Route path="/admin" element={<Login />} />
+              <Route
+                path="/admin/tools"
+                element={
+                  <RequireAuth>
+                    <AdminTools />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/admin/categories"
+                element={
+                  <RequireAuth>
+                    <AdminCategories />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/admin/locations"
+                element={
+                  <RequireAuth>
+                    <AdminLocations />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/admin/labels"
+                element={
+                  <RequireAuth>
+                    <AdminLabels />
+                  </RequireAuth>
+                }
+              />
+            </Routes>
+          </main>
+          <Footer />
+        </div>
       </AuthProvider>
     </DataProvider>
   )
