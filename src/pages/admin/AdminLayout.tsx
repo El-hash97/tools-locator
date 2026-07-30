@@ -21,7 +21,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="mx-auto max-w-3xl pb-10">
-      <header className="px-4 pt-5">
+      <header className="px-4 pt-5 border-b border-neutral-200">
         <div className="flex items-center justify-between">
           {/* h-11 = 44px: judul dijadikan tautan ke beranda, jadi ikut
               batas minimal target sentuh seperti tautan lain di aplikasi. */}

@@ -27,7 +27,7 @@ export default function Home() {
 
   return (
     <div className="mx-auto min-h-full max-w-2xl pb-28">
-      <header className="sticky top-0 z-10 bg-neutral-50/95 px-4 pb-3 pt-5 backdrop-blur">
+      <header className="sticky top-0 z-10 bg-neutral-50/95 px-4 pb-3 pt-5 backdrop-blur border-b border-neutral-200">
         <div className="mb-3 flex items-center justify-between">
           <h1 className="text-xl font-bold text-neutral-900">
             Tool <span className="text-toyota">Locator</span>

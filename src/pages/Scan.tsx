@@ -62,7 +62,7 @@ export default function Scan() {
 
   return (
     <div className="mx-auto max-w-2xl pb-10">
-      <header className="flex items-center gap-2 px-4 py-4">
+      <header className="flex items-center gap-2 px-4 py-4 border-b border-neutral-200">
         <Link
           to="/"
           aria-label="Kembali"
