@@ -28,14 +28,15 @@ export default function Home() {
   return (
     <div className="mx-auto min-h-full max-w-2xl pb-28">
       <header className="sticky top-0 z-10 bg-neutral-50/95 px-4 pb-3 pt-5 backdrop-blur border-b border-neutral-200">
-        <div className="mb-3 flex items-center justify-between">
-          <h1 className="text-xl font-bold text-neutral-900">
+        <div className="mb-3 flex items-center justify-between relative">
+          <img src="/logo.png" alt="Logo" className="h-8 w-auto absolute left-0" />
+          <h1 className="text-xl font-bold text-neutral-900 mx-auto w-fit">
             Tool <span className="text-toyota">Locator</span>
           </h1>
           <Link
             to="/admin"
             aria-label="Panel admin"
-            className="flex h-11 w-11 items-center justify-center rounded-full text-neutral-500 active:bg-neutral-200"
+            className="flex h-11 w-11 items-center justify-center rounded-full text-neutral-500 active:bg-neutral-200 absolute right-0"
           >
             <Settings className="h-5 w-5" aria-hidden="true" />
           </Link>
