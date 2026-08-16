@@ -1,11 +1,12 @@
 import { useState, type FormEvent } from 'react'
 import { useData } from '@/data/DataProvider'
 import { formatLocation } from '@/lib/format'
+import { ZoneBullet } from '@/components/Denah'
 import { AdminLayout } from './AdminLayout'
 import type { Location } from '@/data/types'
 
 export default function AdminLocations() {
-  const { locations, repo, refresh } = useData()
+  const { locations, zones, repo, refresh } = useData()
   const [area, setArea] = useState('')
   const [rak, setRak] = useState('')
   const [levelBin, setLevelBin] = useState('')
@@ -28,6 +29,18 @@ export default function AdminLocations() {
       setArea('')
       setRak('')
       setLevelBin('')
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Gagal menyimpan')
+    }
+  }
+
+  // Titik denah dipilih di daftar, bukan di form tambah: satu kontrol saja
+  // sudah melayani lokasi baru maupun lokasi lama yang pindah titik.
+  async function setZona(location: Location, zoneId: string) {
+    setError(null)
+    try {
+      await repo.saveLocation({ ...location, zone_id: zoneId || undefined })
+      await refresh()
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Gagal menyimpan')
     }
@@ -109,9 +122,28 @@ export default function AdminLocations() {
             key={location.id}
             className="flex items-center gap-3 rounded-xl bg-white p-3 ring-1 ring-neutral-200"
           >
+            <ZoneBullet
+              warna={
+                zones.find((z) => z.id === location.zone_id)?.warna ?? '#D4D4D4'
+              }
+            />
             <p className="min-w-0 flex-1 truncate font-medium">
               {formatLocation(location)}
             </p>
+            <select
+              aria-label={`Titik denah untuk ${formatLocation(location)}`}
+              value={location.zone_id ?? ''}
+              onChange={(e) => setZona(location, e.target.value)}
+              // h-11 = 44px: batas minimal target sentuh.
+              className="h-11 max-w-36 rounded-lg border border-neutral-200 px-2 text-sm"
+            >
+              <option value="">Tanpa titik</option>
+              {zones.map((zone) => (
+                <option key={zone.id} value={zone.id}>
+                  {zone.nama}
+                </option>
+              ))}
+            </select>
             <button
               type="button"
               onClick={() => hapus(location)}

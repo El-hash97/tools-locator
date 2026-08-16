@@ -2,10 +2,11 @@ import { Link, useParams } from 'react-router-dom'
 import { ImageOff, MapPin } from 'lucide-react'
 import { useData } from '@/data/DataProvider'
 import { formatLocation } from '@/lib/format'
+import { Denah, DenahLegend, ZoneBullet } from '@/components/Denah'
 
 export default function Return() {
   const { id } = useParams<{ id: string }>()
-  const { tools, locations, loading, error } = useData()
+  const { tools, locations, zones, loading, error } = useData()
 
   if (loading) return <p className="p-6 text-center text-neutral-500">Memuat…</p>
 
@@ -52,6 +53,7 @@ export default function Return() {
   }
 
   const location = locations.find((l) => l.id === tool.location_id)
+  const zone = zones.find((z) => z.id === location?.zone_id)
 
   return (
     <div className="mx-auto max-w-2xl pb-10">
@@ -87,6 +89,34 @@ export default function Return() {
             {formatLocation(location)}
           </p>
         </div>
+
+        {zones.length > 0 && (
+          <section className="mt-4">
+            <p className="mb-2 flex items-center gap-2 text-sm text-neutral-700">
+              {zone ? (
+                <>
+                  <ZoneBullet warna={zone.warna} berkedip />
+                  <span>
+                    Cari titik berkedip di denah —{' '}
+                    <strong className="font-semibold text-neutral-900">
+                      {zone.nama}
+                    </strong>
+                  </span>
+                </>
+              ) : (
+                // Lokasi lama bisa belum dipetakan ke titik denah. Denah tetap
+                // ditampilkan supaya MP masih bisa membaca areanya sendiri.
+                <span className="text-neutral-500">
+                  Lokasi ini belum dipetakan ke titik denah.
+                </span>
+              )}
+            </p>
+            <Denah zones={zones} highlightId={zone?.id} />
+            <div className="mt-3">
+              <DenahLegend zones={zones} activeId={zone?.id} />
+            </div>
+          </section>
+        )}
 
         {tool.keterangan && (
           <div className="mt-4 rounded-xl bg-amber-50 p-4 text-center text-sm text-amber-900 ring-1 ring-amber-200">

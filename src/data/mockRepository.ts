@@ -5,9 +5,11 @@ import type {
   LocationInput,
   Tool,
   ToolInput,
+  Zone,
+  ZoneInput,
 } from './types'
 import type { ToolRepository } from './repository'
-import { seedCategories, seedLocations, seedTools } from './seed'
+import { seedCategories, seedLocations, seedTools, seedZones } from './seed'
 
 export const STORAGE_KEY = 'tool-locator:data:v1'
 
@@ -15,6 +17,7 @@ type Db = {
   tools: Tool[]
   categories: Category[]
   locations: Location[]
+  zones: Zone[]
 }
 
 function save(db: Db): void {
@@ -37,11 +40,35 @@ function load(): Db {
       tools: [...seedTools],
       categories: [...seedCategories],
       locations: [...seedLocations],
+      zones: [...seedZones],
     }
     save(initial)
     return initial
   }
-  return JSON.parse(raw) as Db
+  const db = JSON.parse(raw) as Db
+  // Penyimpanan yang dibuat sebelum fitur denah tidak punya `zones`. Diisi
+  // ulang dari seed, bukan dengan menaikkan STORAGE_KEY — menaikkan kunci
+  // akan membuang tools yang sudah diinput admin.
+  if (!db.zones) {
+    db.zones = [...seedZones]
+    // Lokasi bawaan yang tersimpan sebelum fitur ini belum punya `zone_id`;
+    // tanpa ini semua tools tampil "belum dipetakan" di denah. Lokasi buatan
+    // admin dibiarkan kosong — titiknya dipilih sendiri di menu Lokasi.
+    db.locations = db.locations.map((l) =>
+      l.zone_id
+        ? l
+        : { ...l, zone_id: seedLocations.find((s) => s.id === l.id)?.zone_id },
+    )
+    save(db)
+  }
+  // `warna` selalu diambil ulang dari seed: warnanya mengikuti gambar dan tidak
+  // pernah bisa diubah admin, jadi penyimpanan lama tidak boleh menahan warna
+  // basi saat gambar atau nilai warnanya dikoreksi.
+  db.zones = db.zones.map((z) => ({
+    ...z,
+    warna: seedZones.find((s) => s.id === z.id)?.warna ?? z.warna,
+  }))
+  return db
 }
 
 function newId(): string {
@@ -142,5 +169,20 @@ export class MockRepository implements ToolRepository {
     }
     db.locations = db.locations.filter((l) => l.id !== id)
     save(db)
+  }
+
+  async getZones(): Promise<Zone[]> {
+    return load().zones
+  }
+
+  async saveZone(input: ZoneInput): Promise<Zone> {
+    const db = load()
+    const index = db.zones.findIndex((z) => z.id === input.id)
+    if (index === -1) throw new Error('Titik denah tidak ditemukan')
+    // `warna` sengaja tidak ikut ditimpa: warnanya sudah tercetak di gambar.
+    const updated: Zone = { ...db.zones[index], ...input }
+    db.zones[index] = updated
+    save(db)
+    return updated
   }
 }

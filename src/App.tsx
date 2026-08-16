@@ -11,6 +11,7 @@ import AdminTools from '@/pages/admin/Tools'
 import AdminCategories from '@/pages/admin/Categories'
 import AdminLocations from '@/pages/admin/Locations'
 import AdminLabels from '@/pages/admin/Labels'
+import AdminZones from '@/pages/admin/Zones'
 import Footer from '@/components/Footer'
 
 export default function App() {
@@ -46,6 +47,14 @@ export default function App() {
                 element={
                   <RequireAuth>
                     <AdminLocations />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/admin/zones"
+                element={
+                  <RequireAuth>
+                    <AdminZones />
                   </RequireAuth>
                 }
               />

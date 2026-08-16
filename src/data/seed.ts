@@ -1,4 +1,4 @@
-import type { Category, Location, Tool } from './types'
+import type { Category, Location, Tool, Zone } from './types'
 
 // Kredensial pengembangan untuk fase mock. Bukan kontrol keamanan —
 // siapa pun yang membuka berkas sumber bisa membacanya. Dibuang seluruhnya
@@ -15,12 +15,57 @@ export const seedCategories: Category[] = [
   { id: 'cat-pouring', nama: 'Alat Pouring', deskripsi: 'Alat area pouring' },
 ]
 
+// Warna diambil dari titik yang sudah tercetak di public/denah.jpg; `x`/`y`
+// persen posisi titik tersebut, ditakar dari gambar dan bisa dikoreksi admin.
+// Warna disalin dari piksel titik yang bersangkutan di public/denah.jpg, jadi
+// bulatan keterangan sama persis dengan titik di gambar. `x`/`y` persen posisi
+// titik tersebut — sudah dicek jatuh tepat di atas titiknya, dan tetap bisa
+// dikoreksi admin bila gambar denah diganti.
+export const seedZones: Zone[] = [
+  { id: 'zone-biru', nama: 'Lemari Tools', warna: '#304FFF', x: 24.5, y: 98 },
+  { id: 'zone-merah', nama: 'Lemari Bawah Tangga', warna: '#D50100', x: 44.1, y: 89.6 },
+  { id: 'zone-hijau-muda', nama: 'Tempat 3', warna: '#C6FF00', x: 60, y: 82 },
+  { id: 'zone-biru-muda', nama: 'Pemberat', warna: '#80D8FE', x: 63.1, y: 82 },
+  { id: 'zone-hitam', nama: 'Tempat 5', warna: '#424242', x: 66.7, y: 82.1 },
+  { id: 'zone-ungu', nama: 'Lemari Relining Ladle', warna: '#AA00FF', x: 96.7, y: 37.3 },
+]
+
 export const seedLocations: Location[] = [
-  { id: 'loc-melting-a1', area: 'Melting', rak: 'Rak A', level_bin: 'Level 1' },
-  { id: 'loc-melting-a2', area: 'Melting', rak: 'Rak A', level_bin: 'Level 2' },
-  { id: 'loc-pouring-b1', area: 'Pouring', rak: 'Rak B', level_bin: 'Level 1' },
-  { id: 'loc-pouring-b3', area: 'Pouring', rak: 'Rak B', level_bin: 'Bin 3' },
-  { id: 'loc-analysis-c1', area: 'Analysis', rak: 'Rak C', level_bin: 'Level 1' },
+  {
+    id: 'loc-melting-a1',
+    area: 'Melting',
+    rak: 'Rak A',
+    level_bin: 'Level 1',
+    zone_id: 'zone-biru',
+  },
+  {
+    id: 'loc-melting-a2',
+    area: 'Melting',
+    rak: 'Rak A',
+    level_bin: 'Level 2',
+    zone_id: 'zone-merah',
+  },
+  {
+    id: 'loc-pouring-b1',
+    area: 'Pouring',
+    rak: 'Rak B',
+    level_bin: 'Level 1',
+    zone_id: 'zone-hijau-muda',
+  },
+  {
+    id: 'loc-pouring-b3',
+    area: 'Pouring',
+    rak: 'Rak B',
+    level_bin: 'Bin 3',
+    zone_id: 'zone-hitam',
+  },
+  {
+    id: 'loc-analysis-c1',
+    area: 'Analysis',
+    rak: 'Rak C',
+    level_bin: 'Level 1',
+    zone_id: 'zone-ungu',
+  },
 ]
 
 export const seedTools: Tool[] = [

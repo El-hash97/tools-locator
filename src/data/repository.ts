@@ -5,6 +5,8 @@ import type {
   LocationInput,
   Tool,
   ToolInput,
+  Zone,
+  ZoneInput,
 } from './types'
 
 export interface ToolRepository {
@@ -20,4 +22,8 @@ export interface ToolRepository {
   getLocations(): Promise<Location[]>
   saveLocation(input: LocationInput): Promise<Location>
   deleteLocation(id: string): Promise<void>
+
+  // Zone hanya bisa diubah namanya/posisinya — titiknya sudah ada di denah.
+  getZones(): Promise<Zone[]>
+  saveZone(input: ZoneInput): Promise<Zone>
 }

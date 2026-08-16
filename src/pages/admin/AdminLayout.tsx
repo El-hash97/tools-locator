@@ -7,6 +7,7 @@ const tabs = [
   { to: '/admin/tools', label: 'Tools' },
   { to: '/admin/categories', label: 'Kategori' },
   { to: '/admin/locations', label: 'Lokasi' },
+  { to: '/admin/zones', label: 'Denah' },
   { to: '/admin/labels', label: 'Label QR' },
 ]
 

@@ -1,14 +1,15 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Search, Settings } from 'lucide-react'
+import { MapPin, Search, Settings } from 'lucide-react'
 import { useData } from '@/data/DataProvider'
 import { searchByName } from '@/lib/fuzzy'
 import { formatLocation } from '@/lib/format'
 import { ToolCard } from '@/components/ToolCard'
 import { ScanFab } from '@/components/ScanFab'
+import { Denah, DenahLegend } from '@/components/Denah'
 
 export default function Home() {
-  const { tools, categories, locations, loading, error } = useData()
+  const { tools, categories, locations, zones, loading, error } = useData()
   const [query, setQuery] = useState('')
   const [categoryId, setCategoryId] = useState<string | null>(null)
 
@@ -75,6 +76,22 @@ export default function Home() {
       </header>
 
       <main className="space-y-2 px-4 pt-2">
+        {!loading && !error && zones.length > 0 && (
+          // <details> dipakai apa adanya: buka-tutup bawaan browser, tanpa
+          // state sendiri. Tertutup secara default supaya hasil pencarian
+          // tidak terdorong ke bawah.
+          <details className="rounded-xl bg-white p-4 ring-1 ring-neutral-200">
+            <summary className="flex h-11 cursor-pointer list-none items-center gap-2 font-semibold text-neutral-900">
+              <MapPin className="h-5 w-5 text-toyota" aria-hidden="true" />
+              Denah area &amp; keterangan warna
+            </summary>
+            <div className="mt-3 space-y-3">
+              <Denah zones={zones} />
+              <DenahLegend zones={zones} />
+            </div>
+          </details>
+        )}
+
         {loading && <p className="py-8 text-center text-neutral-500">Memuat…</p>}
         {error && <p className="py-8 text-center text-toyota">{error}</p>}
 

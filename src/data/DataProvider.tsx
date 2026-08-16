@@ -7,7 +7,7 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import type { Category, Location, Tool } from './types'
+import type { Category, Location, Tool, Zone } from './types'
 import type { ToolRepository } from './repository'
 import { MockRepository } from './mockRepository'
 
@@ -15,6 +15,7 @@ export type DataState = {
   tools: Tool[]
   categories: Category[]
   locations: Location[]
+  zones: Zone[]
   loading: boolean
   error: string | null
   refresh: () => Promise<void>
@@ -31,6 +32,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [tools, setTools] = useState<Tool[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [locations, setLocations] = useState<Location[]>([])
+  const [zones, setZones] = useState<Zone[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -38,14 +40,16 @@ export function DataProvider({ children }: { children: ReactNode }) {
     setLoading(true)
     setError(null)
     try {
-      const [t, c, l] = await Promise.all([
+      const [t, c, l, z] = await Promise.all([
         repository.getTools(),
         repository.getCategories(),
         repository.getLocations(),
+        repository.getZones(),
       ])
       setTools(t)
       setCategories(c)
       setLocations(l)
+      setZones(z)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Gagal memuat data')
     } finally {
@@ -62,12 +66,13 @@ export function DataProvider({ children }: { children: ReactNode }) {
       tools,
       categories,
       locations,
+      zones,
       loading,
       error,
       refresh,
       repo: repository,
     }),
-    [tools, categories, locations, loading, error, refresh],
+    [tools, categories, locations, zones, loading, error, refresh],
   )
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>
