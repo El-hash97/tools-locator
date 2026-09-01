@@ -13,6 +13,17 @@ body {
   @apply bg-neutral-50 text-neutral-900 antialiased;
 }
 
+/* Titik denah: kedip dari hilang total ke muncul agar posisinya jelas. */
+@keyframes denah-blink {
+  0%, 35% { opacity: 0; transform: scale(0.4); }
+  55%, 85% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(0.4); }
+}
+
+.denah-blink {
+  animation: denah-blink 1.3s ease-in-out infinite;
+}
+
 @media print {
   body {
     background: white;

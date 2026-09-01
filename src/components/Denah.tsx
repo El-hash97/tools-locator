@@ -71,15 +71,18 @@ export function ZoneBullet({
   return (
     <span className={`relative flex shrink-0 ${size}`}>
       {berkedip && (
-        // animate-ping = lingkaran membesar lalu memudar berulang (berkedip).
+        // Halo tetap berdenyut samar sebagai penanda area.
         <span
-          className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-75"
+          className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-60"
           style={{ backgroundColor: warna }}
           aria-hidden="true"
         />
       )}
       <span
-        className="relative inline-flex h-full w-full rounded-full ring-1 ring-white"
+        className={`relative inline-flex h-full w-full rounded-full ring-1 ring-white ${
+          // Titik utama kedip: hilang total lalu muncul, biar posisinya jelas.
+          berkedip ? 'denah-blink' : ''
+        }`}
         style={{ backgroundColor: warna }}
         aria-hidden="true"
       />
