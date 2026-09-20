@@ -1,4 +1,4 @@
-import { useState, type ChangeEvent } from 'react'
+import { useRef, useState, type ChangeEvent } from 'react'
 import { compressImage } from '@/lib/image'
 
 type Props = {
@@ -9,10 +9,13 @@ type Props = {
 
 export function PhotoInput({ label, value, onChange }: Props) {
   const [error, setError] = useState<string | null>(null)
-  const inputId = `photo-${label.replace(/\s+/g, '-').toLowerCase()}`
+  const cameraRef = useRef<HTMLInputElement>(null)
+  const galleryRef = useRef<HTMLInputElement>(null)
 
   async function pick(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
+    // reset agar pemilihan file yang sama tetap memicu onChange berikutnya
+    event.target.value = ''
     if (!file) return
     setError(null)
     try {
@@ -27,9 +30,7 @@ export function PhotoInput({ label, value, onChange }: Props) {
 
   return (
     <div>
-      <label htmlFor={inputId} className="mb-1 block text-sm font-medium">
-        {label}
-      </label>
+      <label className="mb-1 block text-sm font-medium">{label}</label>
 
       {value && (
         <img
@@ -39,15 +40,41 @@ export function PhotoInput({ label, value, onChange }: Props) {
         />
       )}
 
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={() => cameraRef.current?.click()}
+          className="flex h-11 flex-1 items-center justify-center gap-1.5 rounded-xl bg-neutral-900 px-3 text-sm font-medium text-white active:bg-black"
+        >
+          <span aria-hidden>📷</span> Kamera
+        </button>
+        <button
+          type="button"
+          onClick={() => galleryRef.current?.click()}
+          className="flex h-11 flex-1 items-center justify-center gap-1.5 rounded-xl bg-white px-3 text-sm font-medium text-neutral-700 ring-1 ring-neutral-300 active:bg-neutral-50"
+        >
+          <span aria-hidden>🖼️</span> Galeri
+        </button>
+      </div>
+
+      {/* Input khusus kamera — capture="environment" membuka kamera belakang langsung */}
       <input
-        id={inputId}
+        ref={cameraRef}
         type="file"
         accept="image/*"
         capture="environment"
         onChange={pick}
-        // file:h-11 = 44px: batas minimal target sentuh untuk tombol "pilih
-        // berkas" yang dirender browser dari pseudo-elemen ::file-selector.
-        className="block w-full text-sm text-neutral-600 file:mr-3 file:h-11 file:rounded-lg file:border-0 file:bg-neutral-100 file:px-3 file:font-medium"
+        className="hidden"
+        tabIndex={-1}
+      />
+      {/* Input galeri — tanpa capture sehingga browser menampilkan pemilih file / galeri */}
+      <input
+        ref={galleryRef}
+        type="file"
+        accept="image/*"
+        onChange={pick}
+        className="hidden"
+        tabIndex={-1}
       />
 
       {error && <p className="mt-1 text-sm text-toyota">{error}</p>}
