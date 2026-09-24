@@ -1,0 +1,74 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Tool Locator — Alur Pakai dari Cari sampai Kembalikan",
+    "quality_profile": "showcase",
+    "views": [
+      {
+        "id": "happy_operator",
+        "label": "MP: Cari → Kembalikan",
+        "focus": ["buka_app", "cari_filter", "hasil_kartu", "detail_lokasi", "scan_pinjam", "kembalikan_view", "selesai"],
+        "note": "Jalur utama MP tanpa login: cari real-time, lihat denah, scan QR untuk kembalikan."
+      },
+      {
+        "id": "admin_setup",
+        "label": "Admin: Setup & QR",
+        "focus": ["login_admin", "kelola_master", "cetak_qr", "detail_lokasi"],
+        "note": "Admin siapkan master data terstruktur lalu cetak label QR yang dipindai MP."
+      },
+      {
+        "id": "gagal_fallback",
+        "label": "Gagal & Fallback",
+        "focus": ["scan_pinjam", "input_manual", "kembalikan_view", "lokasi_salah"],
+        "note": "Kamera gagal pakai input manual, lokasi salah tetap terlihat di foto penempatan."
+      }
+    ]
+  },
+  "lanes": [
+    { "id": "operator", "label": "MP — Operator Lapangan" },
+    { "id": "pwa", "label": "Tool Locator PWA" },
+    { "id": "admin", "label": "Admin Tools" },
+    { "id": "exception", "label": "Gagal & Fallback", "variant": "exception" }
+  ],
+  "phases": [
+    { "id": "siap", "label": "Buka", "fromCol": 0, "toCol": 0 },
+    { "id": "cari", "label": "Cari & Temukan", "fromCol": 1, "toCol": 3, "variant": "emphasis" },
+    { "id": "kembali", "label": "Kembalikan", "fromCol": 4, "toCol": 5, "variant": "dashed" }
+  ],
+  "groups": [],
+  "mainPath": ["buka_app", "cari_filter", "hasil_kartu", "detail_lokasi", "scan_pinjam", "kembalikan_view", "selesai"],
+  "nodes": [
+    { "id": "buka_app", "lane": "operator", "col": 0, "type": "external", "label": "Buka Aplikasi", "sublabel": "PWA, tanpa login", "width": 132 },
+    { "id": "cari_filter", "lane": "pwa", "col": 1, "type": "frontend", "label": "Cari & Filter", "sublabel": "FR-B1/B2, typo OK", "tag": "real-time", "width": 132 },
+    { "id": "hasil_kartu", "lane": "pwa", "col": 2, "type": "frontend", "label": "Hasil Kartu", "sublabel": "foto + jumlah + Area Rak", "width": 132 },
+    { "id": "detail_lokasi", "lane": "pwa", "col": 3, "type": "backend", "label": "Detail & Denah", "sublabel": "foto penempatan + titik", "tag": "FR-B4", "width": 132 },
+    { "id": "scan_pinjam", "lane": "operator", "col": 4, "type": "security", "label": "Scan QR", "sublabel": "kamera HP / FAB", "tag": "FR-C1", "width": 132 },
+    { "id": "kembalikan_view", "lane": "pwa", "col": 4, "type": "cloud", "label": "\"Kembalikan ke sini\"", "sublabel": "foto besar + lokasi", "tag": "FR-C2", "width": 132 },
+    { "id": "selesai", "lane": "operator", "col": 5, "type": "external", "label": "Selesai", "sublabel": "tools di Bin benar", "width": 132 },
+    { "id": "login_admin", "lane": "admin", "col": 1, "type": "security", "label": "Login Admin", "sublabel": "FR-D1, RLS", "width": 132 },
+    { "id": "kelola_master", "lane": "admin", "col": 2, "type": "database", "label": "Kelola Master", "sublabel": "Tools • Kategori • Lokasi", "tag": "FR-A1—A4", "width": 132 },
+    { "id": "cetak_qr", "lane": "admin", "col": 3, "type": "backend", "label": "Generate & Cetak QR", "sublabel": "QR per tools + label", "tag": "FR-A5/A6", "width": 132 },
+    { "id": "input_manual", "lane": "exception", "col": 3, "type": "messagebus", "label": "Input Kode Manual", "sublabel": "fallback kamera", "tag": "FR-C3", "width": 132 },
+    { "id": "lokasi_salah", "lane": "exception", "col": 5, "type": "security", "label": "Lokasi Salah", "sublabel": "cek foto, ulang scan", "width": 132 }
+  ],
+  "edges": [
+    { "from": "buka_app", "to": "cari_filter", "label": "buka /", "variant": "default" },
+    { "from": "cari_filter", "to": "hasil_kartu", "label": "ketik + filter", "variant": "emphasis" },
+    { "from": "hasil_kartu", "to": "detail_lokasi", "label": "tap kartu" },
+    { "from": "detail_lokasi", "to": "scan_pinjam", "label": "ambil & scan", "variant": "emphasis" },
+    { "from": "scan_pinjam", "to": "kembalikan_view", "label": "QR terdeteksi" },
+    { "from": "kembalikan_view", "to": "selesai", "label": "letakkan di Bin", "variant": "emphasis" },
+    { "from": "login_admin", "to": "kelola_master", "label": "auth OK" },
+    { "from": "kelola_master", "to": "cetak_qr", "label": "auto QR" },
+    { "from": "cetak_qr", "to": "detail_lokasi", "label": "QR tertempel", "variant": "dashed" },
+    { "from": "scan_pinjam", "to": "input_manual", "label": "kamera gagal", "variant": "security", "role": "error" },
+    { "from": "input_manual", "to": "kembalikan_view", "label": "kode valid", "variant": "dashed", "role": "branch" },
+    { "from": "kembalikan_view", "to": "lokasi_salah", "label": "salah Bin", "variant": "security", "role": "error" },
+    { "from": "lokasi_salah", "to": "kembalikan_view", "label": "ulang", "variant": "dashed", "role": "return" }
+  ],
+  "cards": [
+    { "dot": "emerald", "title": "MP: Cari", "items": ["Cari + filter + typo → kartu foto & lokasi"] },
+    { "dot": "cyan", "title": "QR Kembali", "items": ["Scan / input manual → \"Kembalikan ke sini\""] }
+  ]
+}
